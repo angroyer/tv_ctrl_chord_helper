@@ -2,15 +2,9 @@
 
 This key chord helper applies when running a TeamViewer server on Ubuntu 26.04 + Wayland.
 
-This helper detects any Ctrl+Key combinations and translates them into a valid shortcut. There is no need to do so with Alt+Key combinations since they are properly transmitted.
+This helper detects any Ctrl+Key combinations and translates them into a valid key. There is no need to do so with Alt+Key combinations since they are properly transmitted.
 
 ## Usage
-
-Before running this script, it is necessary to add your linux user to the "input" group:
-```bash
-sudo usermod -aG input $USER
-```
-Log out and log back in.
 
 Then run the script:
 ```bash
@@ -64,10 +58,14 @@ You can notice the 'Ctrl+a' combination is sent as value 16777217 (0x1000001) wh
 
 It would the same for letter b, that is sent as 16777218 (0x1000002) whereas Wayland expects the letter 'b' to be sent as value 98 (0x62).
 
-To solve this issue, the tv_ctrl_chord_helper.py reads the `busctl` command output and translates into a `uinput` event. The value is computed as follows: if value is between 0x1000001 and 0x100001A, substract 0x1000000 and add 0x60 and send as a uinput event.
-
 ## Implementation details
 
-This script does not require any specific additional python libs. It would have been possible to use dbus_next and evdev libs to reduce the amount of code but this requires installing additional libs.
+The tv_ctrl_chord_helper.py monitors the dbus session, compute the value and sends it to a separate dbus session. The value is computed as follows: if value is between 0x1000001 and 0x100001A, substract 0x1000000 and add 0x60 to match the value of an ASCII letter.
 
-This script reads your Ubuntu keyboard map in order to apply it before sending a uinput event.
+This script require Gio and Glib libs.
+
+In Ubuntu, install it with:
+```bash
+sudo apt install python3-gi
+```
+
